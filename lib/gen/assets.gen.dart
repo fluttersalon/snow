@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 class Assets {
   Assets._();
 
+  static const AssetGenImage imgp4604 = AssetGenImage('assets/IMGP4604.jpg');
   static const AssetGenImage imgp4614 = AssetGenImage('assets/IMGP4614.jpg');
 }
 

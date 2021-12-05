@@ -1,37 +1,20 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:snow/snow_logic.dart';
 
 class Snow extends StatelessWidget {
   final double size;
   static const rate = 0.7;
 
-  static Random _random = Random();
-
   double x;
   double y;
-  double? displayHeight = 1000;
 
   Snow({
     required this.size,
     required this.x,
     required this.y,
     Key? key,
-    this.displayHeight,
   }) : super(key: key);
-
-  Snow.generate(
-      {required double minSize,
-      required double maxSize,
-      required double width,
-      required double height})
-      : this(
-          size: _random.nextDouble() * (maxSize - minSize) + minSize,
-          x: width * _random.nextDouble(),
-          y: height * _random.nextDouble(),
-          displayHeight: height,
-        );
 
   @override
   Widget build(BuildContext context) {
@@ -62,13 +45,5 @@ class Snow extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void fall(double speed) {
-    y += speed;
-
-    if (y > (displayHeight ?? 2000)) {
-      y = 0;
-    }
   }
 }

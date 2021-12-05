@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:snow/snow_logic.dart';
+import 'package:timer_builder/timer_builder.dart';
+import 'data/snow_data.dart';
 import 'gen/assets.gen.dart';
 import 'gen/snow.dart';
 
@@ -34,48 +37,57 @@ class MyHomePage extends StatefulWidget {
 }
 
 GlobalKey _keyScaffold = GlobalKey();
+const NUMBER_OF_SNOW = 100;
+const SPEED_OF_SNOW = 3;
+const MIN_SIZE_OF_SNOW = 10.0;
+const MAX_SIZE_OF_SNOW = 20.0;
+const FRAME_RATE = 1000 / 15;
 
 class _MyHomePageState extends State<MyHomePage> {
   List<Snow> snows = [];
+  List<SnowData> snowData = [];
   Timer? _timer;
+
+  late SnowLogic logic;
 
   @override
   void initState() {
-    WidgetsBinding.instance?.addPostFrameCallback((cb) {
+    super.initState();
+
+    WidgetsBinding.instance?.addPostFrameCallback((callback) {
       RenderBox scaffold =
           _keyScaffold.currentContext?.findRenderObject() as RenderBox;
 
-      print("scaffold 高さ${scaffold.size.height}  ${scaffold.size.width}");
+      logic = SnowLogic(scaffold.size);
 
-      for (int i = 0; i < 5; i++) {
-        snows.add(
-          Snow.generate(
-            minSize: 10,
-            maxSize: 20,
-            width: scaffold.size.width,
-            height: scaffold.size.height,
-          ),
-        );
-
-        _timer = Timer.periodic(Duration(milliseconds: (1000).ceil()), (timer) {
-          print("test");
-          for (var snow in snows) {
-            snow.fall(10);
-            print('${snow.x} ${snow.y}');
-          }
-
-          setState(() {
-            snows = [...snows];
-            print('aaa');
-          });
-        });
+      for (int i = 0; i < NUMBER_OF_SNOW; i++) {
+        snowData.add(logic.generate(i, MIN_SIZE_OF_SNOW, MAX_SIZE_OF_SNOW));
       }
 
-      // AppBarの位置と高さを取得後、setStateメソッドで全体を再描画する
-      setState(() {});
-    });
+      _timer =
+          Timer.periodic(Duration(milliseconds: FRAME_RATE.ceil()), (timer) {
+        List<Snow> newSnows = [];
 
-    super.initState();
+        for (int i = 0; i < snowData.length; i++) {
+          snowData[i] = logic.fall(snowData[i], 10);
+        }
+
+        for (var snow in snowData) {
+          Snow newSnow = Snow(
+            key: snow.snowKey,
+            x: snow.x,
+            y: snow.y,
+            size: snow.size,
+          );
+          newSnows.add(newSnow);
+          // print('${snow.x} ${snow.y}');
+        }
+
+        setState(() {
+          snows = newSnows;
+        });
+      });
+    });
   }
 
   @override
@@ -86,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //print('build');
     return Scaffold(
       key: _keyScaffold,
       body: Stack(
@@ -94,15 +107,10 @@ class _MyHomePageState extends State<MyHomePage> {
             decoration: BoxDecoration(
               color: Colors.black,
               image: DecorationImage(
-                image: AssetImage(Assets.imgp4614.assetName),
+                image: AssetImage(Assets.imgp4604.assetName),
                 fit: BoxFit.cover,
               ),
             ),
-          ),
-          Snow(
-            size: 15,
-            x: 100,
-            y: 150,
           ),
           ...snows
         ],
